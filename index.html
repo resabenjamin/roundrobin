@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Round Robin Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1c2040;--mut:#636a8c;--bg:#f1f2fa;--line:#e2e4f2;--acc:#2f5fe8;--ok:#1f9d6e;--bad:#d6405f;
+--c0:#8aa8ff;--c1:#ffc166;--c2:#5fd8b0;--c3:#ff8fa8;--c4:#c3a6ff;--c5:#66d3ea;--c6:#e6d36b;--c7:#a9b4c9;
+--sans:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.bar{background:#191c3a;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 32px}
+.brand{display:flex;gap:12px;align-items:center}.brand i{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#2f5fe8,#35c4b0);display:grid;place-items:center}
+.brand b{display:block;font-size:18px;font-weight:800}.brand span{font-size:12px;color:#9a9fc8}
+.seg{display:inline-flex;background:#eceefa;border-radius:11px;padding:3px;gap:2px}.bar .seg{background:rgba(255,255,255,.1)}
+.seg button{border:0;background:transparent;color:var(--mut);font:700 14px var(--sans);padding:7px 15px;border-radius:9px;cursor:pointer}.bar .seg button{color:#c4c8e8}
+.seg button.on{background:#fff;color:var(--acc);box-shadow:0 1px 3px rgba(28,32,64,.2)}
+main{max-width:1200px;margin:0 auto;padding:26px 28px 56px}.view{display:none}.view.on{display:block}
+h1{font-size:28px;font-weight:800;letter-spacing:-.025em;margin:0 0 4px}.lede{margin:0 0 20px;color:var(--mut);max-width:72ch}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(28,32,64,.04),0 10px 28px rgba(28,32,64,.05)}
+.panel h2{font-size:15.5px;font-weight:800;margin:0 0 12px;display:flex;gap:9px;align-items:center}.panel h2::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--acc)}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:16px}@media(max-width:900px){.g2{grid-template-columns:1fr}}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.row label{font-size:13px;color:var(--mut);font-weight:600;display:flex;gap:6px;align-items:center}
+input[type=number],input[type=text],select{font:inherit;border:1px solid #d3d7ec;border-radius:8px;padding:5px 8px;background:#fff;color:var(--ink)}input[type=number]{width:64px;font-family:var(--mono)}input[type=text]{width:70px;font-family:var(--mono)}
+button.b{font:700 14px var(--sans);border:1px solid #d3d7ec;background:#fff;border-radius:9px;padding:7px 14px;cursor:pointer;color:var(--ink)}button.b:hover{border-color:var(--acc);color:var(--acc)}button.p{background:var(--acc);border-color:var(--acc);color:#fff}button.p:hover{filter:brightness(1.1);color:#fff}
+:focus-visible{outline:3px solid rgba(47,95,232,.4);outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left}th{background:#f6f7fd;color:var(--mut);font-size:12.5px}td.n,th.n{text-align:right;font-family:var(--mono)}th.n{font-family:var(--sans)}tr.sum td{font-weight:700;background:#f6f7fd}tr.win>td{background:#eaf8f1}tr.cur>td{background:#eef2ff}
+.chip{display:inline-block;padding:1px 10px;border-radius:99px;font:700 12.5px var(--mono);color:#10163a}.x{border:0;background:none;color:var(--mut);cursor:pointer;font-size:16px}
+.cpu{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;margin-bottom:14px}.box{border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;background:#fafaff}.box small{display:block;color:var(--mut);font-weight:700;font-size:11.5px;margin-bottom:4px}
+.cpubox{min-width:150px;text-align:center}.cpubox b{display:block;font:800 26px var(--mono);min-height:38px}.queue{flex:1;min-width:220px}.qs{display:flex;gap:6px;flex-wrap:wrap;min-height:32px;align-items:center}
+.gantt{display:flex;gap:3px;height:54px}.gantt div{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#10163a;font-size:12.5px;font-weight:800;min-width:0;overflow:hidden;border-radius:8px}.gantt small{font:500 10px var(--mono);opacity:.8}
+.idle{background:repeating-linear-gradient(135deg,#dfe2f2 0 5px,#eef0fa 5px 10px)}.cs{background:#3a3f6b;color:#fff!important}
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:14px 0 0}@media(max-width:800px){.tiles{grid-template-columns:repeat(3,1fr)}}.tiles div{background:#f6f7fd;border-radius:10px;padding:9px;text-align:center}.tiles b{display:block;font:700 18px var(--mono)}.tiles small{color:var(--mut);font-weight:600;font-size:11.5px}
+.take{display:flex;gap:11px;align-items:flex-start;padding:11px 14px;border-radius:12px;margin-bottom:8px;background:#f6f7fd}.take::before{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;margin-top:1px}
+.take.good{background:#e8f7f0}.take.good::before{content:"\2713";background:#1f9d6e}.take.bad{background:#fde8ed}.take.bad::before{content:"!";background:#d6405f}.take.note{background:#eef0ff}.take.note::before{content:"i";background:#5a6fd8}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;font-weight:600;margin-bottom:6px}.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+svg text{font:11px var(--mono);fill:#636a8c}.scroll{overflow-x:auto}
+</style></head><body>
+<header class="bar"><div class="brand"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v4h-4"/></svg></i><div><b>Round Robin Lab</b><span>Operating Systems · CPU scheduling</span></div></div>
+<nav class="seg" id="tabs"><button class="on" data-t="sim">Simulator</button><button data-t="ana">Quantum analysis</button></nav></header>
+<main>
+<section id="sim" class="view on">
+<h1>Watch Round Robin share the CPU</h1><p class="lede">Each process runs for at most one time quantum. If it is not finished, it goes to the back of the ready queue. Edit the workload, choose a quantum, and step through the schedule.</p>
+<div class="g2"><div class="panel"><h2>Workload</h2>
+<div class="row"><label>Preset <select id="preset"><option value="exam">Exam tasks (5 processes)</option><option value="textbook">Textbook (24, 3, 3)</option><option value="classic">Classic (A, B, C, D)</option></select></label></div>
+<div class="scroll"><table id="wl"></table></div>
+<div class="row" style="margin-top:12px"><button class="b" id="add">Add process</button><label>Quantum <input type="number" id="q" min="1" value="2"></label><label>Switch cost <input type="number" id="cost" min="0" value="0"></label></div>
+<p style="margin:0;color:var(--mut);font-size:13px">Times are in ticks. Switch cost is the time lost whenever the CPU is handed to a different process.</p></div>
+<div class="panel"><h2>CPU and ready queue</h2>
+<div class="cpu"><div class="box cpubox"><small>CPU at time <span id="clk">0</span></small><b id="run">idle</b><small id="rem"></small></div>
+<div class="box queue"><small>READY QUEUE (front → back)</small><div class="qs" id="rq"></div><small style="margin-top:8px">FINISHED</small><div class="qs" id="dn"></div></div></div>
+<div class="row"><button class="b p" id="step">Step</button><button class="b" id="auto">Run</button><button class="b" id="reset">Reset</button><button class="b" id="fin">Show final</button></div>
+<div class="gantt" id="gantt"></div></div></div>
+<div class="panel"><h2>Results</h2><div class="scroll"><table id="res"></table></div><div class="tiles" id="tiles"></div></div>
+</section>
+<section id="ana" class="view">
+<h1>How does the quantum change performance?</h1><p class="lede">The same workload is run with every quantum from 1 up to the longest burst. A tiny quantum responds fast but switches constantly. A huge quantum behaves like First Come First Served.</p>
+<div class="panel"><h2>What to notice</h2><div id="ins"></div></div>
+<div class="panel"><h2>Average times by quantum</h2><div class="legend"><span><i style="background:#2f5fe8"></i>Waiting</span><span><i style="background:#8a5cf0"></i>Turnaround</span><span><i style="background:#e5486f"></i>Response</span><span><i style="background:#18a58a"></i>Selected quantum</span></div><div class="scroll"><svg id="ch1" viewBox="0 0 760 270" width="100%"></svg></div></div>
+<div class="panel"><h2>Context switches by quantum</h2><div class="scroll"><svg id="ch2" viewBox="0 0 760 200" width="100%"></svg></div></div>
+<div class="panel"><h2>All quantum values</h2><div class="scroll"><table id="sw"></table></div></div>
+</section></main>
+<script>
+const $=id=>document.getElementById(id),COL=i=>`var(--c${i%8})`;
+const PRE={exam:[['P1',0,5],['P2',1,3],['P3',2,8],['P4',3,6],['P5',4,4]],textbook:[['P1',0,24],['P2',0,3],['P3',0,3]],classic:[['A',0,7],['B',2,4],['C',4,1],['D',5,4]]};
+let P=PRE.exam.map(p=>({n:p[0],at:p[1],bt:p[2]})),T=0,tm=null,R;
+const num=(v,lo,d)=>Math.max(lo,Math.floor(+v)||d);
+const Q=()=>num($('q').value,1,2),C=()=>num($('cost').value,0,0);
+function rr(P,q,cost){const n=P.length,ord=P.map((p,i)=>i).sort((a,b)=>P[a].at-P[b].at||a-b),rem=P.map(p=>p.bt),fr=Array(n).fill(null),ct=Array(n).fill(0),segs=[],rd=[];
+ let t=0,nx=0,done=0,last=null,sw=0;const adm=()=>{while(nx<n&&P[ord[nx]].at<=t)rd.push(ord[nx++])};adm();
+ while(done<n){if(!rd.length){const j=P[ord[nx]].at;segs.push({l:'idle',s:t,e:j,q:[]});t=j;last=null;adm();continue}
+  const i=rd.shift();if(last!==null&&last!==i){sw++;if(cost){segs.push({l:'cs',s:t,e:t+cost,q:[i,...rd]});t+=cost;adm()}}
+  if(fr[i]===null)fr[i]=t;const d=Math.min(q,rem[i]);segs.push({l:i,s:t,e:t+d,q:[...rd]});t+=d;rem[i]-=d;adm();
+  if(rem[i]>0)rd.push(i);else{ct[i]=t;done++}last=i}
+ const m=[];segs.forEach(g=>{const p=m[m.length-1];if(p&&p.l===g.l&&p.e===g.s&&g.l!=='idle'&&g.l!=='cs')p.e=g.e;else m.push({...g})});
+ const rows=P.map((p,i)=>({ct:ct[i],tat:ct[i]-p.at,wt:ct[i]-p.at-p.bt,rt:fr[i]-p.at})),mk=Math.max(...ct),busy=P.reduce((s,p)=>s+p.bt,0),av=f=>rows.reduce((s,r)=>s+r[f],0)/n;
+ return{segs:m,rows,sm:{wt:av('wt'),tat:av('tat'),rt:av('rt'),sw,mk,ut:100*busy/mk,th:n/mk}}}
+const chip=i=>`<span class="chip" style="background:${COL(i)}">${P[i].n}</span>`;
+function recalc(){R=rr(P,Q(),C());T=Math.min(T,R.sm.mk)}
+function drawWL(){$('wl').innerHTML='<tr><th>Name</th><th class="n">Arrival</th><th class="n">Burst</th><th></th></tr>'+P.map((p,i)=>`<tr><td><input type="text" value="${p.n}" maxlength="4" aria-label="name" onchange="P[${i}].n=this.value||'P${i+1}';go()"></td><td class="n"><input type="number" min="0" value="${p.at}" onchange="P[${i}].at=num(this.value,0,0);go()"></td><td class="n"><input type="number" min="1" value="${p.bt}" onchange="P[${i}].bt=num(this.value,1,1);go()"></td><td>${P.length>1?`<button class="x" aria-label="Remove" onclick="P.splice(${i},1);go(true)">×</button>`:''}</td></tr>`).join('')}
+function draw(){const mk=R.sm.mk,t=T,segs=R.segs;
+ const g=segs.find(s=>s.s<=t&&t<s.e),ex=P.map(()=>0);segs.forEach(s=>{if(typeof s.l==='number')ex[s.l]+=Math.max(0,Math.min(s.e,t)-s.s)});
+ $('clk').textContent=t;
+ if(t>=mk){$('run').textContent='done';$('rem').textContent='all processes finished'}
+ else if(g&&typeof g.l==='number'){$('run').textContent=P[g.l].n;$('rem').textContent=`${P[g.l].bt-ex[g.l]} ticks left`}
+ else{$('run').textContent=g&&g.l==='cs'?'switch':'idle';$('rem').textContent=g&&g.l==='cs'?'context switch overhead':'no process ready'}
+ const run=g&&typeof g.l==='number'?g.l:-1;let q=g?g.q.filter(i=>i!==run):[];
+ P.forEach((p,i)=>{if(g&&p.at>g.s&&p.at<=t&&i!==run&&!q.includes(i)&&ex[i]<p.bt)q.push(i)});
+ $('rq').innerHTML=q.length?q.map(chip).join(''):'<span style="color:var(--mut)">empty</span>';
+ const dn=P.map((p,i)=>i).filter(i=>R.rows[i].ct<=t);$('dn').innerHTML=dn.length?dn.map(chip).join(''):'<span style="color:var(--mut)">none yet</span>';
+ const vis=segs.filter(s=>s.s<t).map(s=>({...s,e:Math.min(s.e,t)}));
+ $('gantt').innerHTML=vis.map(s=>`<div class="${s.l==='idle'?'idle':s.l==='cs'?'cs':''}" style="flex:${s.e-s.s};${typeof s.l==='number'?'background:'+COL(s.l):''}"><span>${typeof s.l==='number'?P[s.l].n:s.l}</span><small>${s.s}–${s.e}</small></div>`).join('')+(t<mk?`<div style="flex:${mk-t};background:none"></div>`:'');
+ const f=T>=mk;$('res').innerHTML='<tr><th>Process</th><th class="n">Arrival</th><th class="n">Burst</th><th class="n">Completion</th><th class="n">Turnaround</th><th class="n">Waiting</th><th class="n">Response</th></tr>'+P.map((p,i)=>`<tr><td>${chip(i)}</td><td class="n">${p.at}</td><td class="n">${p.bt}</td><td class="n">${R.rows[i].ct}</td><td class="n">${R.rows[i].tat}</td><td class="n">${R.rows[i].wt}</td><td class="n">${R.rows[i].rt}</td></tr>`).join('')+`<tr class="sum"><td colspan="4">Average</td><td class="n">${R.sm.tat.toFixed(2)}</td><td class="n">${R.sm.wt.toFixed(2)}</td><td class="n">${R.sm.rt.toFixed(2)}</td></tr>`;
+ const s=R.sm;$('tiles').innerHTML=`<div><b>${s.wt.toFixed(2)}</b><small>avg waiting</small></div><div><b>${s.tat.toFixed(2)}</b><small>avg turnaround</small></div><div><b>${s.rt.toFixed(2)}</b><small>avg response</small></div><div><b>${s.sw}</b><small>context switches</small></div><div><b>${s.ut.toFixed(1)}%</b><small>CPU utilization</small></div><div><b>${s.th.toFixed(3)}</b><small>throughput / tick</small></div>`}
+function sweep(){const top=Math.max(...P.map(p=>p.bt)),out=[];for(let q=1;q<=top;q++)out.push({q,...rr(P,q,C()).sm});return out}
+function line(S,key,col,sx,sy){return `<polyline fill="none" stroke="${col}" stroke-width="2.4" points="${S.map(r=>sx(r.q)+','+sy(r[key])).join(' ')}"/>`+S.map(r=>`<circle cx="${sx(r.q)}" cy="${sy(r[key])}" r="3" fill="${col}"/>`).join('')}
+function drawAna(){const S=sweep(),qs=Q(),n=S.length,L=48,Rt=740,Tp=14,Bt=236,sx=q=>n===1?(L+Rt)/2:L+(q-1)*(Rt-L)/(n-1),mx=Math.max(...S.map(r=>Math.max(r.wt,r.tat,r.rt)))*1.08||1,sy=v=>Bt-v/mx*(Bt-Tp),step=Math.ceil(n/20);
+ let a=`<line x1="${L}" x2="${Rt}" y1="${Bt}" y2="${Bt}" stroke="#c9cce6"/>`+[0,.25,.5,.75,1].map(f=>`<line x1="${L}" x2="${Rt}" y1="${sy(mx*f)}" y2="${sy(mx*f)}" stroke="#eceefa"/><text x="${L-6}" y="${sy(mx*f)+4}" text-anchor="end">${(mx*f).toFixed(0)}</text>`).join('')+S.filter(r=>(r.q-1)%step===0||r.q===n).map(r=>`<text x="${sx(r.q)}" y="${Bt+16}" text-anchor="middle">${r.q}</text>`).join('')+`<text x="${(L+Rt)/2}" y="${Bt+32}" text-anchor="middle">time quantum</text>`;
+ if(qs>=1&&qs<=n)a+=`<line x1="${sx(qs)}" x2="${sx(qs)}" y1="${Tp}" y2="${Bt}" stroke="#18a58a" stroke-width="2" stroke-dasharray="5 4"/>`;
+ $('ch1').innerHTML=a+line(S,'tat','#8a5cf0',sx,sy)+line(S,'wt','#2f5fe8',sx,sy)+line(S,'rt','#e5486f',sx,sy);
+ const mw=Math.max(...S.map(r=>r.sw))||1,bw=Math.min(28,(Rt-L)/n-4);
+ $('ch2').innerHTML=`<line x1="${L}" x2="${Rt}" y1="170" y2="170" stroke="#c9cce6"/>`+S.map(r=>{const h=r.sw/mw*140,x=n===1?(L+Rt)/2:sx(r.q);return `<rect x="${x-bw/2}" y="${170-h}" width="${bw}" height="${h}" rx="4" fill="${r.q===qs?'#18a58a':'#9fb4f5'}"/><text x="${x}" y="${164-h}" text-anchor="middle">${r.sw}</text>`+((r.q-1)%step===0||r.q===n?`<text x="${x}" y="188" text-anchor="middle">${r.q}</text>`:'')}).join('');
+ const bw1=S.reduce((m,r)=>r.wt<m.wt?r:m),br=S.reduce((m,r)=>r.rt<m.rt?r:m),s1=S[0],sn=S[n-1],I=[];
+ I.push(['good',`<b>Quantum ${br.q}</b> gives the fastest response: average ${br.rt.toFixed(2)} ticks until a process first runs.`]);
+ I.push([bw1.q===n?'note':'good',bw1.q===n?`Average waiting time is lowest (${bw1.wt.toFixed(2)}) at quantum ${bw1.q}, where Round Robin behaves like FCFS. Round Robin gives up some waiting time to respond sooner.`:`<b>Quantum ${bw1.q}</b> gives the lowest average waiting time: ${bw1.wt.toFixed(2)}.`]);
+ I.push(['bad',`Quantum 1 causes <b>${s1.sw}</b> context switches, against ${sn.sw} at quantum ${n}.`+(C()?` With a switch cost of ${C()}, CPU utilization drops to ${s1.ut.toFixed(1)}%.`:' Set a switch cost to see this overhead reduce CPU utilization.')]);
+ I.push(['note',`Average response time rises from ${s1.rt.toFixed(2)} (quantum 1) to ${sn.rt.toFixed(2)} (quantum ${n}): a larger quantum makes new processes wait longer for their first turn.`]);
+ $('ins').innerHTML=I.map(([c,t])=>`<div class="take ${c}"><span>${t}</span></div>`).join('');
+ $('sw').innerHTML='<tr><th class="n">Quantum</th><th class="n">Avg waiting</th><th class="n">Avg turnaround</th><th class="n">Avg response</th><th class="n">Switches</th><th class="n">CPU utilization</th><th></th></tr>'+S.map(r=>`<tr class="${r.q===qs?'cur':r===bw1?'win':''}"><td class="n">${r.q}</td><td class="n">${r.wt.toFixed(2)}</td><td class="n">${r.tat.toFixed(2)}</td><td class="n">${r.rt.toFixed(2)}</td><td class="n">${r.sw}</td><td class="n">${r.ut.toFixed(1)}%</td><td>${r.q===n?'same as FCFS':''}${r===bw1?' lowest waiting':''}${r.q===qs?' selected':''}</td></tr>`).join('')}
+function stop(){clearInterval(tm);tm=null;$('auto').textContent='Run'}
+function go(wl){stop();T=0;recalc();if(wl)drawWL();draw();drawAna()}
+$('step').onclick=()=>{stop();if(T<R.sm.mk){T++;draw()}};
+$('auto').onclick=()=>{if(tm){stop();return}if(T>=R.sm.mk)T=0;$('auto').textContent='Pause';tm=setInterval(()=>{if(T>=R.sm.mk){stop();return}T++;draw()},650)};
+$('reset').onclick=()=>{stop();T=0;draw()};$('fin').onclick=()=>{stop();T=R.sm.mk;draw()};
+$('q').onchange=()=>go();$('cost').onchange=()=>go();
+$('add').onclick=()=>{if(P.length<8){P.push({n:'P'+(P.length+1),at:0,bt:4});go(true)}};
+$('preset').onchange=e=>{P=PRE[e.target.value].map(p=>({n:p[0],at:p[1],bt:p[2]}));go(true)};
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===b.dataset.t))});
+drawWL();go();
+</script></body></html>
